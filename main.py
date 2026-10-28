@@ -5,16 +5,25 @@ import country_api
 def main():
     while True:
         code = input('Enter country code or press enter to quit ')
-        # TODO check code is 2 letters 
-        # TODO end the loop if user presses enter
-        found, name, error = country_api.get_country_name(code)
+        # Treat empty or whitespace-only input as the request to exit.
+        if not code.strip():
+            break
+
+        result = country_api.lookup_country(code)
         
-        if found:
-            print(f'{code} is the country code for {name}')
-        elif not found and not error:
+        if result.found:
+            # Some countries may not have a capital listed by the API.
+            if result.capital:
+                print(f'{code} is the country code for {result.name}. Its capital is {result.capital}.')
+            else:
+                print(f'{code} is the country code for {result.name}. Its capital is unavailable.')
+        elif not result.error:
             print('No country found for that code')
         else:
-            print('Error fetching data')
+            # Include the detail from the lookup result instead of hiding the cause.
+            print(f'Error fetching data: {result.error}')
         
 
-main()
+# Allow importing main in tests or other modules without starting the prompt loop.
+if __name__ == '__main__':
+    main()
